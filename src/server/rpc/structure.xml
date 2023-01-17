@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Dataset>
+    <Store number="">
+        <Brand/>
+        <Store_name/>
+        <Ownership_type/>
+        <Address>
+            <Street/>
+            <City ref=""/>
+            <Postcode/>
+        </Address>
+        <Phone_number/>
+        <Coordinates Longitude="" Latitude=""/>
+    </Store>
+    <Cities>
+        <City id="">
+            <Name/>
+            <Country/>
+            <State_Province/>
+            <City_coordinates Longitude="" Latitude=""/>
+        </City>
+    </Cities>
+</Dataset>

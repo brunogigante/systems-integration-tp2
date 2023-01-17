@@ -1,29 +1,34 @@
 import asyncio
 import time
 import uuid
+import psycopg2
 
 import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+from converter import convert_to_xml
+from db_connection import db_xml_connection
 
-from utils.to_xml_converter import CSVtoXMLConverter
 
 def get_csv_files_in_input_folder():
     return [os.path.join(dp, f) for dp, dn, filenames in os.walk(CSV_INPUT_PATH) for f in filenames if
             os.path.splitext(f)[1] == '.csv']
 
+
 def generate_unique_file_name(directory):
     return f"{directory}/{str(uuid.uuid4())}.xml"
 
+
 def convert_csv_to_xml(in_path, out_path):
-    converter = CSVtoXMLConverter(in_path)
-    file = open(out_path, "w")
-    file.write(converter.to_xml_str())
+    convert_to_xml(in_path, out_path)
+
 
 class CSVHandler(FileSystemEventHandler):
-    def __init__(self, input_path, output_path):
+
+    def __init__(self, input_path, output_path, connection):
         self._output_path = output_path
         self._input_path = input_path
+        self._connection = connection
 
         # generate file creation events for existing files
         for file in [os.path.join(dp, f) for dp, dn, filenames in os.walk(input_path) for f in filenames]:
@@ -35,6 +40,7 @@ class CSVHandler(FileSystemEventHandler):
         # here we avoid converting the same file again
         # !TODO: check converted files in the database
         if csv_path in await self.get_converted_files():
+            print("Already exists")
             return
 
         print(f"new file to convert: '{csv_path}'")
@@ -43,15 +49,29 @@ class CSVHandler(FileSystemEventHandler):
         xml_path = generate_unique_file_name(self._output_path)
 
         # we do the conversion
-        # !TODO: once the conversion is done, we should updated the converted_documents tables
         convert_csv_to_xml(csv_path, xml_path)
         print(f"new xml file generated: '{xml_path}'")
 
+        # !TODO: once the conversion is done, we should updated the converted_documents tables
+        with self._connection.cursor() as cursor:
+            cursor.execute('insert into converted_documents (src, file_size, dst) values (%s, %s, %s)',
+                           (csv_path, os.path.getsize(csv_path), xml_path))
+            self._connection.commit()
+
         # !TODO: we should store the XML document into the imported_documents table
+        with self._connection.cursor() as cursor:
+            with open(xml_path) as f:
+                file_data = f.read()
+                cursor.execute('insert into imported_documents (file_name, xml, is_deleted) values (%s, %s, false)',
+                               (xml_path, file_data))
+                self._connection.commit()
 
     async def get_converted_files(self):
-        # !TODO: you should retrieve from the database the files that were already converted before
-        return []
+        with self._connection.cursor() as cursor:
+            cursor.execute('select src from converted_documents')
+            result = cursor.fetchall()
+            return map(lambda x: x[0], result)
+
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith(".csv"):
@@ -62,11 +82,12 @@ if __name__ == "__main__":
 
     CSV_INPUT_PATH = "/csv"
     XML_OUTPUT_PATH = "/shared/output"
+    CONNECTION = db_xml_connection()
 
     # create the file observer
     observer = Observer()
     observer.schedule(
-        CSVHandler(CSV_INPUT_PATH, XML_OUTPUT_PATH),
+        CSVHandler(CSV_INPUT_PATH, XML_OUTPUT_PATH, CONNECTION),
         path=CSV_INPUT_PATH,
         recursive=True)
     observer.start()

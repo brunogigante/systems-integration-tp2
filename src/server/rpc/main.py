@@ -2,35 +2,42 @@ import signal, sys
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
-from functions.string_length import string_length
-from functions.string_reverse import string_reverse
+from functions.execute_queries import execute_queries
+from functions.queries import *
 
-PORT = int(sys.argv[1]) if len(sys.argv) >= 2 else 9000
 
-if __name__ == "__main__":
-    class RequestHandler(SimpleXMLRPCRequestHandler):
-        rpc_paths = ('/RPC2',)
+class RequestHandler(SimpleXMLRPCRequestHandler):
+    rpc_paths = ('/RPC2',)
 
-    with SimpleXMLRPCServer(('localhost', PORT), requestHandler=RequestHandler) as server:
-        server.register_introspection_functions()
 
-        def signal_handler(signum, frame):
-            print("received signal")
-            server.server_close()
+with SimpleXMLRPCServer(('0.0.0.0', 9000), requestHandler=RequestHandler, allow_none=True) as server:
+    server.register_introspection_functions()
 
-            # perform clean up, etc. here...
-            print("exiting, gracefully")
-            sys.exit(0)
 
-        # signals
-        signal.signal(signal.SIGTERM, signal_handler)
-        signal.signal(signal.SIGHUP, signal_handler)
-        signal.signal(signal.SIGINT, signal_handler)
+    def signal_handler(signum, frame):
+        print("received signal")
+        server.server_close()
 
-        # register both functions
-        server.register_function(string_reverse)
-        server.register_function(string_length)
+        # perform clean up, etc. here...
 
-        # start the server
-        print(f"Starting the RPC Server in port {PORT}...")
-        server.serve_forever()
+        print("exiting, gracefully")
+        sys.exit(0)
+
+
+    # signals
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGHUP, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # register functions
+    server.register_function(execute_queries)
+    server.register_function(list_stores)
+    server.register_function(list_countries_stores)
+    server.register_function(list_ownership_stores)
+    server.register_function(list_portuguese_cities_stores)
+    server.register_function(list_stores_contacts)
+    server.register_function(list_stores_cities)
+
+    # start the server
+    print("Starting the RPC Server...")
+    server.serve_forever()
