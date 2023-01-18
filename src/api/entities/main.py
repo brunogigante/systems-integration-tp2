@@ -21,13 +21,6 @@ app = Flask(__name__)
 app.config["DEBUG"] = True
 
 
-@app.route('/api/cities/coordinates/<entities_per_iteration>', methods=['GET'])
-def get_cities_without_coordinates(entities_per_iteration):
-    with connection_rel.cursor() as cursor:
-        cursor.execute(f'select id, name, country, state_province from city where city_coordinates is null limit {entities_per_iteration}')
-        result = cursor.fetchall()
-    return jsonify(result)
-
 @app.route('/api/cities_xml/<path:file>', methods=['GET'])
 def get_cities_xml(file):
     file_name = str(file)
@@ -102,6 +95,7 @@ def get_stores():
         cursor.execute("""select * from store""")
         result = cursor.fetchall()
     return jsonify(result)
+
 @app.route('/api/cities/', methods=['GET'])
 def get_cities():
     with connection_rel.cursor() as cursor:
@@ -115,6 +109,7 @@ def get_stores_by_number(store_number):
         cursor.execute(f"""select * from store where id = {store_number}""")
         result = cursor.fetchall()
     return jsonify(result)
+
 @app.route('/api/cities/<city_id>', methods=['GET'])
 def get_cities_by_id(city_id):
     with connection_rel.cursor() as cursor:
@@ -132,6 +127,7 @@ def update_stores():
         cursor.execute(f"""update store set number={data[1]}, brand={data[2]}, ownership_type={data[3]}, store_name={data[4]}, street={data[5]}, postcode={data[6]}, phone_number={data[7]}
         where id = {data[0]}""")
     return 200
+
 @app.route('/api/cities/', methods=['PUT'])
 def update_cities():
     data = request.get_json()

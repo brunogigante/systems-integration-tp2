@@ -7,7 +7,6 @@ import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 from converter import convert_to_xml
-from db_connection import db_xml_connection
 
 
 def get_csv_files_in_input_folder():
@@ -82,7 +81,10 @@ if __name__ == "__main__":
 
     CSV_INPUT_PATH = "/csv"
     XML_OUTPUT_PATH = "/shared/output"
-    CONNECTION = db_xml_connection()
+    CONNECTION = psycopg2.connect(user="is",
+                                  password="is",
+                                  host="db-xml",
+                                  database="is")
 
     # create the file observer
     observer = Observer()

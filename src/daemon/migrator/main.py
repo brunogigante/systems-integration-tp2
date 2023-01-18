@@ -41,6 +41,17 @@ if __name__ == "__main__":
     db_org = psycopg2.connect(host='db-xml', database='is', user='is', password='is')
     db_dst = psycopg2.connect(host='db-rel', database='is', user='is', password='is')
 
+    resp = requests.get("http://api-gis:8080/api/markers/")
+    print("AAAA")
+    coiso = resp.json()
+    print(coiso[0])
+    """
+    coordinates = []
+    for i in range(len(coiso)):
+        coordinates.append(coiso[i][2])
+    print(type(coordinates[0]))
+    """
+
     while True:
 
         # Connect to both databases

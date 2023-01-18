@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {LayerGroup, useMap} from 'react-leaflet';
 import {ObjectMarker} from "./ObjectMarker";
 
+
 const DEMO_DATA = [
     {
         "type": "feature",
@@ -55,8 +56,18 @@ const DEMO_DATA = [
 function ObjectMarkersGroup() {
 
     const map = useMap();
-    const [geom, setGeom] = useState([...DEMO_DATA]);
+    const [geom, setGeom] = useState([]);
     const [bounds, setBounds] = useState(map.getBounds());
+    /**
+     * Gets the Markes for the map
+     */
+    const getMarkers = async () => {
+        console.log("olaaaaaaaaaaa");
+        const data = await fetch("http://172.30.0.7:8080/api/markers")
+        const parsedData = data.json()
+        console.log("adddeeeeuusssss", parsedData);
+        setGeom(parsedData);
+    }
 
     /**
      * Setup the event to update the bounds automatically
@@ -74,8 +85,10 @@ function ObjectMarkersGroup() {
 
     /* Updates the data for the current bounds */
     useEffect(() => {
+        getMarkers().then(() => console.log('resolvido')).catch()
+
         console.log(`> getting data for bounds`, bounds);
-        setGeom(DEMO_DATA);
+        console.log('yo')
     }, [bounds])
 
     return (
