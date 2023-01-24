@@ -1,6 +1,5 @@
 import csv
 from xml.etree.ElementTree import SubElement, ElementTree, Element
-from get_api_data import get_data
 
 
 def convert_to_xml(in_path, out_path):
@@ -13,7 +12,7 @@ def convert_to_xml(in_path, out_path):
 
         # Write data into the ET
         for num, row in enumerate(csv_f):
-            if num == 1000:
+            if num == 5000:
                 break
             store = SubElement(root, 'Store', {
                 'number': row['Store Number']

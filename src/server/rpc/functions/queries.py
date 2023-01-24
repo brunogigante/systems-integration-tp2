@@ -49,6 +49,11 @@ def list_stores_contacts():
 FROM imported_documents
 WHERE is_deleted = false;"""
 
+def list_cities():
+    return """SELECT unnest(xpath('/Dataset/Cities/City/Name/text()', xml))::text as city_name
+FROM imported_documents
+WHERE is_deleted = false
+ORDER BY city_name;"""
 
 # List all the stores that exist in the city referenced
 def list_stores_cities(city):

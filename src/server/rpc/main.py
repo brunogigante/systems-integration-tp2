@@ -36,6 +36,7 @@ with SimpleXMLRPCServer(('0.0.0.0', 9000), requestHandler=RequestHandler, allow_
     server.register_function(list_ownership_stores)
     server.register_function(list_portuguese_cities_stores)
     server.register_function(list_stores_contacts)
+    server.register_function(list_cities)
     server.register_function(list_stores_cities)
 
     # start the server

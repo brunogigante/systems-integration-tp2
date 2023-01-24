@@ -36,21 +36,33 @@ def execute_query(query, connection):
 def check_db(connection):
     return execute_query("""select file_name from imported_documents where is_migrated = false""", connection)
 
+def get_cities_xml(file_name, connection):
+    return execute_query(f"""SELECT unnest(xpath('/Dataset/Cities/City//@id', xml))::text as city_id,
+            unnest(xpath('/Dataset/Cities/City/Name/text()', xml))::text as city_name,
+            unnest(xpath('/Dataset/Cities/City/Country/text()', xml))::text as city_country,
+            unnest(xpath('/Dataset/Cities/City/State_Province/text()', xml))::text as city_state
+            FROM imported_documents
+            WHERE is_deleted = false AND file_name = '{file_name}';""", connection)
+
+def get_stores_xml(file_name, connection):
+    return execute_query(f"""SELECT unnest(xpath('/Dataset/Store//@number', xml))::text as store_number,
+            unnest(xpath('/Dataset/Store/Brand/text()', xml))::text as brand,
+            unnest(xpath('/Dataset/Store/Store_name/text()', xml))::text as store_name,
+            unnest(xpath('/Dataset/Store/Ownership_type/text()', xml))::text as ownership,
+            unnest(xpath('/Dataset/Store/Address/Street/text()', xml))::text as street,
+            unnest(xpath('/Dataset/Store/Address/City//@ref', xml))::text as city_ref,
+            unnest(xpath('/Dataset/Store/Address/City/text()', xml))::text as city_name,
+            unnest(xpath('/Dataset/Store/Address/Postcode/text()', xml))::text as postcode,
+            unnest(xpath('/Dataset/Store/Phone_number/text()', xml))::text as phone,
+            point(unnest(xpath('/Dataset/Store/Coordinates//@Longitude', xml))::text::float, 
+            unnest(xpath('/Dataset/Store/Coordinates//@Latitude', xml))::text::float) as coordinates
+            FROM imported_documents
+            WHERE is_deleted = false AND file_name = '{file_name}';""", connection)
+
 if __name__ == "__main__":
 
     db_org = psycopg2.connect(host='db-xml', database='is', user='is', password='is')
     db_dst = psycopg2.connect(host='db-rel', database='is', user='is', password='is')
-
-    resp = requests.get("http://api-gis:8080/api/markers/")
-    print("AAAA")
-    coiso = resp.json()
-    print(coiso[0])
-    """
-    coordinates = []
-    for i in range(len(coiso)):
-        coordinates.append(coiso[i][2])
-    print(type(coordinates[0]))
-    """
 
     while True:
 
@@ -72,10 +84,9 @@ if __name__ == "__main__":
         new_files = check_db(db_org)
         # !TODO: 2- Execute a SELECT queries with xpath to retrieve the data we want to store in the relational db
         for file in new_files:
-            resp_get_cities = requests.get(f"http://api-entities:8080/api/cities_xml/{file[0]}")
-            resp_get_stores = requests.get(f"http://api-entities:8080/api/stores_xml/{file[0]}")
-            city_data = resp_get_cities.json()
-            store_data = resp_get_stores.json()
+            city_data = get_cities_xml(file[0], db_org)
+            store_data = get_stores_xml(file[0], db_org)
+
         # !TODO: 3- Execute INSERT queries in the destination db
             headers = {'Content-type': 'application/json'}
             resp_insert_cities = requests.post(f"http://api-entities:8080/api/cities/", data=json.dumps(city_data), headers=headers)

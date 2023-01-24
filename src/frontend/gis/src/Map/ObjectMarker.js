@@ -1,5 +1,7 @@
 import {Avatar, List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
-import FlagIcon from '@mui/icons-material/Flag';
+import HomeIcon from '@mui/icons-material/Home';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import PlaceIcon from '@mui/icons-material/Place';
 import PictureInPictureAltIcon from '@mui/icons-material/PictureInPictureAlt';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import React from "react";
@@ -7,22 +9,21 @@ import {Marker, Popup} from 'react-leaflet';
 import {icon as leafletIcon, point} from "leaflet";
 
 const LIST_PROPERTIES = [
-    {"key": "country", label: "Country", Icon: FlagIcon},
-    {"key": "number", label: "Shirt Number", Icon: ContactsIcon},
-    {"key": "position", label: "Position", Icon: PictureInPictureAltIcon}
+    {"key": "number", Icon: AssignmentIndIcon},
+    {"key": "city", Icon: PlaceIcon},
 ];
 
 export function ObjectMarker({geoJSON}) {
     const properties = geoJSON?.properties
-    const {id, imgUrl, name} = properties;
+    const {city, number, store, image} = properties;
     const coordinates = geoJSON?.geometry?.coordinates;
 
     return (
         <Marker
             position={coordinates}
             icon={leafletIcon({
-                iconUrl: imgUrl,
-                iconRetinaUrl: imgUrl,
+                iconUrl: image,
+                iconRetinaUrl: image,
                 iconSize: point(50, 50),
             })}
         >
@@ -30,9 +31,9 @@ export function ObjectMarker({geoJSON}) {
                 <List dense={true}>
                     <ListItem>
                         <ListItemIcon>
-                            <Avatar alt={name} src={imgUrl}/>
+                            <Avatar alt={store} src={image}/>
                         </ListItemIcon>
-                        <ListItemText primary={name}/>
+                        <ListItemText primary={store}/>
                     </ListItem>
                     {
                         LIST_PROPERTIES
@@ -44,7 +45,7 @@ export function ObjectMarker({geoJSON}) {
                                     <ListItemText
                                         primary={<span>
                                         {properties[key]}<br/>
-                                        <label style={{fontSize: "xx-small"}}>({label})</label>
+
                                     </span>}
                                     />
                                 </ListItem>

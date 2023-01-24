@@ -1,17 +1,45 @@
-import TopTeams from "../Procedures/TopTeams";
+import Stores from "../Procedures/Stores";
+import NumberStoresCountry from "../Procedures/NumberStoresCountry";
+import NumberStoresOwnership from "../Procedures/NumberStoresOwnership";
+import PortugueseCitiesStores from "../Procedures/PortugueseCitiesStores";
+import StoresContacts from "../Procedures/StoresContacts";
+import CitiesStores from "../Procedures/StoresCity";
 
 const Sections = [
 
     {
-        id: "top-teams",
-        label: "Top Teams",
-        content: <TopTeams/>
+        id: "stores",
+        label: "Stores",
+        content: <Stores/>
     },
 
     {
-        id: "top-scorers",
-        label: "Top Scorers",
-        content: <h1>Top Scorers - Work in progresss</h1>
+        id: "countries-stores",
+        label: "Number of stores by country",
+        content: <NumberStoresCountry/>
+    },
+
+    {
+        id: "ownership-stores",
+        label: "Number of stores by ownership",
+        content: <NumberStoresOwnership/>
+    },
+
+    {
+        id: "portuguese-cities-stores",
+        label: "Portuguese cities stores",
+        content: <PortugueseCitiesStores/>
+    },
+    {
+        id: "store-contacts",
+        label: "Stores contacts",
+        content: <StoresContacts/>
+    },
+
+    {
+        id: "stores-by-city",
+        label: "City stores",
+        content: <CitiesStores/>
     }
 
 ];

@@ -20,40 +20,6 @@ connection_xml = psycopg2.connect(user="is",
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
-
-@app.route('/api/cities_xml/<path:file>', methods=['GET'])
-def get_cities_xml(file):
-    file_name = str(file)
-    with connection_xml.cursor() as cursor:
-        cursor.execute(f"""SELECT unnest(xpath('/Dataset/Cities/City//@id', xml))::text as city_id,
-            unnest(xpath('/Dataset/Cities/City/Name/text()', xml))::text as city_name,
-            unnest(xpath('/Dataset/Cities/City/Country/text()', xml))::text as city_country,
-            unnest(xpath('/Dataset/Cities/City/State_Province/text()', xml))::text as city_state
-            FROM imported_documents
-            WHERE is_deleted = false AND file_name = concat('/','{file_name}');""")
-        result = cursor.fetchall()
-    return jsonify(result)
-
-@app.route('/api/stores_xml/<path:file>', methods=['GET'])
-def get_stores_xml(file):
-    file_name = str(file)
-    with connection_xml.cursor() as cursor:
-        cursor.execute(f"""SELECT unnest(xpath('/Dataset/Store//@number', xml))::text as store_number,
-            unnest(xpath('/Dataset/Store/Brand/text()', xml))::text as brand,
-            unnest(xpath('/Dataset/Store/Store_name/text()', xml))::text as store_name,
-            unnest(xpath('/Dataset/Store/Ownership_type/text()', xml))::text as ownership,
-            unnest(xpath('/Dataset/Store/Address/Street/text()', xml))::text as street,
-            unnest(xpath('/Dataset/Store/Address/City//@ref', xml))::text as city_ref,
-            unnest(xpath('/Dataset/Store/Address/City/text()', xml))::text as city_name,
-            unnest(xpath('/Dataset/Store/Address/Postcode/text()', xml))::text as postcode,
-            unnest(xpath('/Dataset/Store/Phone_number/text()', xml))::text as phone,
-            point(unnest(xpath('/Dataset/Store/Coordinates//@Longitude', xml))::text::float, 
-            unnest(xpath('/Dataset/Store/Coordinates//@Latitude', xml))::text::float) as coordinates
-            FROM imported_documents
-            WHERE is_deleted = false AND file_name = concat('/','{file_name}');""")
-        result = cursor.fetchall()
-    return jsonify(result)
-
 @app.route('/api/cities/', methods=['POST'])
 def set_cities():
     data = {}

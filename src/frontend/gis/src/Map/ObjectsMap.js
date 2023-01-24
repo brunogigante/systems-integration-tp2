@@ -6,7 +6,7 @@ function ObjectsMap() {
     return (
         <MapContainer style={{width: "100%", height: "100vh"}}
                       center={[41.69462, -8.84679]}
-                      zoom={17}
+                      zoom={7}
                       scrollWheelZoom={false}
         >
             <TileLayer
